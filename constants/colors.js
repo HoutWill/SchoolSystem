@@ -16,7 +16,7 @@ export function useColors() {
   }
   return {
     scheme: scheme,
-    textColor: "white",
-    amitBlue: "#8eb0fb",
+    textColor: "black",
+    amitBlue: "#0C46C4",
   };
 }

@@ -17,6 +17,7 @@ export default function HomeScreen() {
         <View style={styles.buttonsWrapper}>
           <ActionButton
             icon={require(`../assets/home/Student Male-light.png`)}
+            text="Student"
             style={{ minWidth: "50%" }}
             onPress={()=>router.push('LoginPage')}
           />

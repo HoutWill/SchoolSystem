@@ -1,20 +1,14 @@
-import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Image, StyleSheet, Text, TouchableOpacity, View ,icon , style , text} from "react-native";
 import React from "react";
 import { useColors } from "../constants/colors";
 
 export default function ActionButton({
-  icon = require(`../assets/home/Student Male-light.png`),
-  text = "Student",
+  icon,
+  text,
   style = {},
   onPress = () => {},
 }) {
-  const colors = useColors();
-  /* let icon;
-    if(colors.scheme=='light'){
-        icon = require(`../assets/home/Student Male-light.png`)
-    }else{
-        icon = require(`../assets/home/Student Male-dark.png`)
-    } */
+  const colors = useColors(); 
   return (
     <View style={[styles.wrapper, style]}>
       <TouchableOpacity onPress={onPress} activeOpacity={0.5} style={{alignItems:'center'}}>
@@ -26,6 +20,7 @@ export default function ActionButton({
     </View>
   );
 }
+
 
 const styles = StyleSheet.create({
   wrapper: {
@@ -40,4 +35,5 @@ const styles = StyleSheet.create({
     padding: 20,
     flexGrow: 0,
   },
+
 });
