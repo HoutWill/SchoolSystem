@@ -1,16 +1,31 @@
 import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 
-export default function TerminalCard() {
+export default function TerminalCard({
+  studentName,
+  terminalName,
+  result,
+  mark, // Make sure you're receiving 'mark' prop here
+  className,
+  section,
+  onPublishPress,
+}) {
   return (
     <View style={styles.card}>
       <View style={styles.topBar} />
 
-      <Text style={styles.title}>Num1 Terminal</Text>
+      {/* Dynamic Title */}
+      <Text style={styles.title}>{terminalName}</Text>
 
-      <View style={styles.contentBox} />
+      {/* Content Box with student info */}
+      <View style={styles.contentBox}>
+        <Text style={styles.studentName}>Name: {studentName}</Text>
+        <Text style={styles.resultText}>Mark: {mark}</Text>
+        <Text style={styles.classText}>Class: {className}</Text> 
+        <Text style={styles.sectionText}>Section: {section}</Text>
+      </View>
 
-      <TouchableOpacity style={styles.publishBtn}>
+      <TouchableOpacity style={styles.publishBtn} onPress={() => onPublishPress(studentName)}>
         <Text style={styles.publishText}>Publish</Text>
       </TouchableOpacity>
     </View>
@@ -21,10 +36,10 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: "#E9E9E9",
     borderRadius: 25,
-    padding: 25,
-    margin: 40,
+    padding: 15,
+    marginHorizontal: 20,
+    marginTop: 40,
     overflow: "hidden",
-    marginTop: 45,
   },
 
   topBar: {
@@ -47,13 +62,37 @@ const styles = StyleSheet.create({
   },
 
   contentBox: {
-    height: 80,
-    backgroundColor: "grey",
-    borderRadius: 4,
+    backgroundColor: "#D3D3D3",
+    borderRadius: 8,
+    padding: 15,
+  },
+
+  studentName: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#000",
+  },
+
+  resultText: {
+    fontSize: 16,
+    color: "#555",
+    marginTop: 5,
+  },
+
+  classText: {
+    fontSize: 16,
+    color: "#555",
+    marginTop: 5,
+  },
+
+  sectionText: {
+    fontSize: 16,
+    color: "#555",
+    marginTop: 5,
   },
 
   publishBtn: {
-    marginTop: 20,
+    marginTop: 15,
     alignSelf: "flex-end",
     paddingVertical: 8,
     paddingHorizontal: 18,

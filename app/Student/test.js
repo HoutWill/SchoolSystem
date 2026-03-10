@@ -8,9 +8,9 @@ import {
   TouchableOpacity,
   SafeAreaView,
 } from "react-native";
-import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Feather from "@expo/vector-icons/Feather";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter, useLocalSearchParams } from "expo-router";
 
 // Profile Tab
@@ -59,14 +59,14 @@ const ProfileTab = ({ route }) => {
 
 // Home Tab
 const HomeTab = ({ route }) => {
-  const { username } = route.params;
-  const router = useRouter(); // Initialize the router
+  const { fullname } = route.params;
+  const router = useRouter();  // Initialize the router
 
   // Helper to navigate with username
   const goToScreen = (screen) => {
     router.push({
       pathname: screen,
-      params: { username },
+      params: { username: fullname },
     });
   };
 
@@ -79,9 +79,8 @@ const HomeTab = ({ route }) => {
           resizeMode="contain"
         />
 
-        <View style={styles.welcomeCard}>
-          <Text style={styles.welcomeText}>Welcome, {username}</Text>
-          <Text style={styles.subText}>Let's get started!</Text>
+        <View style={styles.card}>
+          <Text style={styles.title}>Welcome, {fullname}</Text>
         </View>
 
         {/* Menu Items */}
@@ -91,7 +90,7 @@ const HomeTab = ({ route }) => {
             onPress={() => goToScreen("/Student/Attendance")}
           >
             <View style={styles.iconBox}>
-              <Feather name="calendar" size={40} color="#0C46C4" />
+              <Image source={require("../../assets/icon/Attendance.png")} style={styles.icon} />
             </View>
             <Text style={styles.menuText}>Attendance</Text>
           </TouchableOpacity>
@@ -101,7 +100,7 @@ const HomeTab = ({ route }) => {
             onPress={() => goToScreen("/Student/Homework")}
           >
             <View style={styles.iconBox}>
-              <Feather name="book-open" size={40} color="#0C46C4" />
+              <Image source={require("../../assets/icon/Attendance.png")} style={styles.icon} />
             </View>
             <Text style={styles.menuText}>Homework</Text>
           </TouchableOpacity>
@@ -111,7 +110,7 @@ const HomeTab = ({ route }) => {
             onPress={() => goToScreen("/Student/Result")}
           >
             <View style={styles.iconBox}>
-              <Feather name="bar-chart" size={40} color="#0C46C4" />
+              <Image source={require("../../assets/icon/Attendance.png")} style={styles.icon} />
             </View>
             <Text style={styles.menuText}>Results</Text>
           </TouchableOpacity>
@@ -121,7 +120,7 @@ const HomeTab = ({ route }) => {
             onPress={() => goToScreen("/Student/Solution")}
           >
             <View style={styles.iconBox}>
-              <Feather name="help-circle" size={40} color="#0C46C4" />
+              <Image source={require("../../assets/icon/Attendance.png")} style={styles.icon} />
             </View>
             <Text style={styles.menuText}>Solution</Text>
           </TouchableOpacity>
@@ -131,7 +130,7 @@ const HomeTab = ({ route }) => {
             onPress={() => goToScreen("/Student/Quiz")}
           >
             <View style={styles.iconBox}>
-              <Feather name="file-text" size={40} color="#0C46C4" />
+              <Image source={require("../../assets/icon/Attendance.png")} style={styles.icon} />
             </View>
             <Text style={styles.menuText}>Quiz</Text>
           </TouchableOpacity>
@@ -146,19 +145,19 @@ const Tab = createBottomTabNavigator();
 
 export default function StudentDashboard() {
   const [studentData, setStudentData] = useState(null);
-  const { username } = useLocalSearchParams(); // Get the username from params
+  const { username } = useLocalSearchParams();  // Get the username from params
 
   useEffect(() => {
     const loadStudentData = async () => {
       try {
         // Get student data from AsyncStorage
-        const storedData = await AsyncStorage.getItem("students");
-        console.log("Loaded student data:", storedData); // Log the data for debugging
+        const storedData = await AsyncStorage.getItem('students');
+        console.log('Loaded student data:', storedData); // Log the data for debugging
 
         if (storedData) {
           const parsedData = JSON.parse(storedData);
           const currentStudentData = parsedData[username]; // Get data for the logged-in user
-
+          
           if (currentStudentData) {
             setStudentData(currentStudentData); // Set the student data for the logged-in user
           } else {
@@ -177,7 +176,7 @@ export default function StudentDashboard() {
 
   if (!studentData) {
     return (
-      <SafeAreaView style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+      <SafeAreaView style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
         <Text>Loading...</Text>
       </SafeAreaView>
     );
@@ -194,12 +193,9 @@ export default function StudentDashboard() {
       <Tab.Screen
         name="Home"
         component={HomeTab}
-        initialParams={{
-          username: studentData.username,
-          fullname: studentData.fullname,
-        }} // passing fullname to Home tab
+        initialParams={{ fullname: studentData.fullname }} // passing fullname to Home tab
         options={{
-          tabBarLabel: "Home",
+          tabBarLabel: 'Home',
           tabBarIcon: ({ color, size }) => (
             <Feather name="home" color={color} size={size} />
           ),
@@ -217,7 +213,7 @@ export default function StudentDashboard() {
           email: studentData.email,
         }} // passing student data to Profile tab
         options={{
-          tabBarLabel: "Profile",
+          tabBarLabel: 'Profile',
           tabBarIcon: ({ color, size }) => (
             <Feather name="user" color={color} size={size} />
           ),
@@ -231,31 +227,6 @@ const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: "#ffffff" },
   background: { width: 400, height: 150, alignSelf: "center" },
   scrollContent: { alignItems: "center", paddingBottom: 40 },
-  welcomeCard: {
-    backgroundColor: "#0C46C4",
-    width: "80%",
-    height: 150,
-    borderRadius: 15,
-    justifyContent: "center",
-    alignItems: "center",
-    marginTop: 30,
-    padding: 15,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.8,
-    shadowRadius: 3,
-    elevation: 5,
-  },
-  welcomeText: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "#fff",
-  },
-  subText: {
-    fontSize: 16,
-    color: "#fff",
-    marginTop: 5,
-  },
   card: {
     borderRadius: 15,
     backgroundColor: "#0C46C4",
@@ -265,13 +236,13 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
   title: { fontSize: 18, fontWeight: "bold", color: "white", fontFamily: "Arial" },
-  profileText: { fontSize: 20, fontWeight: "bold", color: "#0C46C4", marginTop: 20, textAlign: "center" },
+  profileText: { fontSize: 20, fontWeight: 'bold', color: "#0C46C4", marginTop: 20, textAlign: 'center' },
   profileCard: {
     backgroundColor: "#f9f9f9",
     borderRadius: 10,
     padding: 15,
     marginVertical: 10,
-    width: "90%",
+    width: '90%',
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -283,10 +254,10 @@ const styles = StyleSheet.create({
   grid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    justifyContent: "flex-start",
-    marginTop: 30,
-    paddingHorizontal: 20,
-    width: "100%", // Ensure the container takes full width
+    justifyContent: "space-between",
+    marginTop: 55,
+    width: 355,
+    paddingHorizontal: 10,
   },
   menuItem: { alignItems: "center", width: "33%", marginBottom: 30 },
   iconBox: {

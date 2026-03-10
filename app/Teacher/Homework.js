@@ -1,177 +1,163 @@
-import {
-  View,
-  StyleSheet,
-  ImageBackground,
-  Image,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  TextInput,
-} from "react-native";
-
-import { useRouter } from "expo-router";
+import React, { useEffect, useState } from "react";
+import { View, Text, StyleSheet, ScrollView, TextInput, TouchableOpacity, Alert } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as DocumentPicker from "expo-document-picker";
+import Header from "../../components/header";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-export default function AddAccount() {
-  const router = useRouter();
+export default function TeacherHomework() {
+  const [homeworkList, setHomeworkList] = useState([]);
+  const [title, setTitle] = useState("");
+  const [subject, setSubject] = useState("");
+  const [className, setClassName] = useState("");
+  const [dueDate, setDueDate] = useState("");
+  const [file, setFile] = useState(null);
+  const [editingIndex, setEditingIndex] = useState(null);
+
+  useEffect(() => {
+    loadHomework();
+  }, []);
+
+  const loadHomework = async () => {
+    const storedHomework = await AsyncStorage.getItem("homework");
+    setHomeworkList(storedHomework ? JSON.parse(storedHomework) : []);
+  };
+
+  const saveHomework = async (data) => {
+    await AsyncStorage.setItem("homework", JSON.stringify(data));
+    setHomeworkList(data);
+  };
+
+  const pickFile = async () => {
+    try {
+      const result = await DocumentPicker.getDocumentAsync({ copyToCacheDirectory: true });
+      console.log("📄 File pick result:", result);
+
+      if (result.type === "success") {
+        // New DocumentPicker returns 'assets' array
+        const pickedFile = result.assets ? result.assets[0] : result;
+        console.log("✅ Picked file:", pickedFile);
+        setFile(pickedFile);
+      }
+    } catch (e) {
+      console.log("❌ File pick error:", e);
+      Alert.alert("Error", "File pick failed");
+    }
+  };
+
+  const addHomework = () => {
+    if (!title || !subject || !className || !dueDate) {
+      Alert.alert("Error", "Please fill all fields");
+      return;
+    }
+
+    const newHomework = { title, subject, className, dueDate, file, submitted: [] };
+
+    let updatedList;
+    if (editingIndex !== null) {
+      // Update existing homework
+      updatedList = [...homeworkList];
+      updatedList[editingIndex] = newHomework;
+      setEditingIndex(null);
+    } else {
+      // Add new homework
+      updatedList = [...homeworkList, newHomework];
+    }
+
+    saveHomework(updatedList);
+
+    // reset form
+    setTitle(""); setSubject(""); setClassName(""); setDueDate(""); setFile(null);
+  };
+
+  const deleteHomework = (index) => {
+    const updatedList = homeworkList.filter((_, i) => i !== index);
+    saveHomework(updatedList);
+
+    // If deleting the one being edited, reset form
+    if (editingIndex === index) {
+      setEditingIndex(null);
+      setTitle(""); setSubject(""); setClassName(""); setDueDate(""); setFile(null);
+    }
+  };
+
+  const editHomework = (index) => {
+    const hw = homeworkList[index];
+    setTitle(hw.title);
+    setSubject(hw.subject);
+    setClassName(hw.className);
+    setDueDate(hw.dueDate);
+    setFile(hw.file || null);
+    setEditingIndex(index);
+  };
+
   return (
     <SafeAreaView style={styles.safeArea}>
-      <View style={styles.container}>
-        <View style={styles.logo}>
-          <Image
-            source={require("../../assets/home/Student Male-light.png")}
-            style={{ width: "14%", padding: 2 }}
-          />
-          <Text style={styles.text1}>HOMEWORK</Text>
-        </View>
-      </View>
+      <Header title="Homework Management" image={require("../../assets/home/Person.png")} />
+      <ScrollView contentContainerStyle={styles.container}>
+        <Text style={styles.label}>Title</Text>
+        <TextInput style={styles.input} value={title} onChangeText={setTitle} placeholder="Enter title" />
 
-      <ScrollView contentContainerStyle={{ paddingTop: 80 }}>
-        <View style={styles.container2}>
-          <Text style={styles.description}>
-            The standard Lorem Ipsum passage.{"\n"}
-            <Text style={styles.descriptionLight}>
-              "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-              eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
-              enim ad minim veniam, quis nostrud exercitation ullamco laboris.
-              eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
-              enim ad minim veniam, quis nostrud exercitation ullamco laboris.
-            </Text>
+        <Text style={styles.label}>Subject</Text>
+        <TextInput style={styles.input} value={subject} onChangeText={setSubject} placeholder="Enter subject" />
+
+        <Text style={styles.label}>Class</Text>
+        <TextInput style={styles.input} value={className} onChangeText={setClassName} placeholder="Enter class" />
+
+        <Text style={styles.label}>Due Date</Text>
+        <TextInput style={styles.input} value={dueDate} onChangeText={setDueDate} placeholder="YYYY-MM-DD" />
+
+        <TouchableOpacity style={styles.fileButton} onPress={pickFile}>
+          <Text style={styles.fileButtonText}>{file ? `File: ${file.name}` : "Upload File"}</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.addButton} onPress={addHomework}>
+          <Text style={styles.addButtonText}>
+            {editingIndex !== null ? "Update Homework" : "Add Homework"}
           </Text>
-        </View>
+        </TouchableOpacity>
 
-        <Text style={styles.text2}>Subject</Text>
+        <Text style={styles.sectionTitle}>Assigned Homework</Text>
+        {homeworkList.length === 0 && <Text style={styles.noData}>No homework added yet</Text>}
 
-        <View style={styles.formContainer}>
-          <Text style={styles.text3}>Add Homework</Text>
-          <TextInput
-            style={[styles.input, { paddingRight: 40 }]}
-            autoCapitalize="none"
-          />
-
-          <TouchableOpacity style={styles.addButton}>
-            <Text style={styles.addButtonText}>Submit</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity>
-            <Text style={styles.forgotPassword}>
-              File is upload successfully
-            </Text>
-          </TouchableOpacity>
-        </View>
-
-        <View></View>
+        {homeworkList.map((hw, index) => (
+          <View key={index} style={[styles.row, index % 2 === 0 ? styles.even : styles.odd]}>
+            <Text style={styles.cell}>{hw.title}</Text>
+            <Text style={styles.cell}>{hw.subject}</Text>
+            <Text style={styles.cell}>{hw.className}</Text>
+            <Text style={styles.cell}>{hw.dueDate}</Text>
+            {hw.file && <Text style={styles.fileText}>{hw.file.name}</Text>}
+            <View style={{ flexDirection: "row" }}>
+              <TouchableOpacity onPress={() => editHomework(index)}>
+                <Text style={styles.editText}>Edit</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => deleteHomework(index)}>
+                <Text style={styles.deleteText}>Delete</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        ))}
       </ScrollView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: "#ffffff",
-  },
-
-  container: {
-    backgroundColor: "#0C46C4",
-    width: "100%",
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    zIndex: 10,
-  },
-
-  logo: {
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 5,
-    paddingLeft: 15,
-    flexDirection: "row",
-    alignSelf: "flex-start",
-  },
-
-  text1: {
-    textAlign: "center",
-    fontSize: 30,
-    color: "white",
-    padding: 15,
-    fontFamily: "arial",
-    paddingLeft: 20,
-    fontWeight: "bold",
-  },
-
-  container2: {
-    backgroundColor: "white",
-    width: "100%",
-    padding: 28,
-    marginTop: 30,
-  },
-
-  description: {
-    fontSize: 12,
-    color: "black",
-    paddingHorizontal: 20,
-    paddingTop: 7,
-    paddingBottom: 16,
-    fontFamily: "Arial",
-    lineHeight: 20,
-  },
-
-  descriptionLight: {
-    opacity: 0.75,
-    fontFamily: "Arial",
-  },
-
-  text2: {
-    backgroundColor: "white",
-    width: "100%",
-    padding: 30,
-    marginLeft: 18,
-    fontSize: 22,
-    color: "#0C46C4",
-    fontWeight: "bold",
-  },
-
-  formContainer: {
-    paddingHorizontal: 50,
-    alignItems: "center",
-  },
-
-  text3: {
-    fontSize: 15,
-    fontFamily: "Arial",
-    color: "#0b0b0b",
-    alignSelf: "flex-start",
-  },
-
-  input: {
-    borderWidth: 1,
-    paddingLeft: 20,
-    fontSize: 14,
-    color: "black",
-    borderColor: "blue",
-    height: 55,
-    width: "100%",
-  },
-
-  addButton: {
-    backgroundColor: "#0C46C4",
-    padding: 12,
-    borderRadius: 8,
-    alignItems: "center",
-    marginTop: 50,
-    width: "100%",
-  },
-
-  addButtonText: {
-    color: "#fff",
-    fontSize: 17,
-  },
-
-  forgotPassword: {
-    color: "#0C46C4",
-    textAlign: "center",
-    marginTop: 15,
-  },
+  safeArea: { flex: 1, backgroundColor: "#f4f6f8" },
+  container: { padding: 20 },
+  label: { marginTop: 10, fontWeight: "bold" },
+  input: { borderWidth: 1, borderColor: "#ccc", borderRadius: 8, padding: 10, marginTop: 5 },
+  fileButton: { marginTop: 10, backgroundColor: "#e0e0e0", padding: 10, borderRadius: 8, alignItems: "center" },
+  fileButtonText: { color: "#333" },
+  addButton: { backgroundColor: "#0C46C4", padding: 12, borderRadius: 8, marginTop: 15, alignItems: "center" },
+  addButtonText: { color: "#fff", fontWeight: "bold" },
+  sectionTitle: { fontWeight: "bold", fontSize: 16, marginTop: 20, marginBottom: 10 },
+  row: { flexDirection: "row", alignItems: "center", marginBottom: 10, flexWrap: "wrap" },
+  even: { backgroundColor: "#ffffff", padding: 10, borderRadius: 8 },
+  odd: { backgroundColor: "#eef6ff", padding: 10, borderRadius: 8 },
+  cell: { flex: 1, textAlign: "center", padding: 5 },
+  editText: { color: "green", marginRight: 10, fontWeight: "bold" },
+  deleteText: { color: "red", fontWeight: "bold" },
+  noData: { textAlign: "center", marginTop: 20, fontStyle: "italic" },
+  fileText: { flex: 1, textAlign: "center", color: "#555" },
 });

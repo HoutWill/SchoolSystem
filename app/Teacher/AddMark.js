@@ -1,79 +1,121 @@
-import {
-  View,
-  StyleSheet,
-  Text,
-  ScrollView,
-  TextInput,
-} from "react-native";
+import React, { useState, useEffect } from "react";
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import Header from "../../components/header";
-import { SafeAreaView } from "react-native-safe-area-context";
-
-const students = Array(10).fill('Prajesh Shakya'); // Placeholder; replace with real data
 
 export default function AddMarks() {
+  const [students, setStudents] = useState([]);
+  const [marks, setMarks] = useState({});
+
+  useEffect(() => {
+    const loadStudents = async () => {
+      const data = await AsyncStorage.getItem("students");
+      if (data) {
+        const parsedStudents = JSON.parse(data);
+        setStudents(Object.values(parsedStudents)); // Set students
+        console.log("Students loaded from AsyncStorage:", parsedStudents); // Log loaded students
+      }
+    };
+    loadStudents();
+  }, []);
+
+  const handleMarkChange = (username, value) => {
+    setMarks((prevMarks) => ({
+      ...prevMarks,
+      [username]: value,
+    }));
+    console.log("Marks updated:", marks); // Log updated marks for each student
+  };
+
+  const handleSaveMarks = async () => {
+    try {
+      const data = await AsyncStorage.getItem("students");
+      const existingStudents = JSON.parse(data);
+      
+      console.log("Existing students before adding marks:", existingStudents); // Log existing students before saving marks
+
+      // Save the marks in AsyncStorage
+      Object.keys(marks).forEach((username) => {
+        if (existingStudents[username]) {
+          existingStudents[username].marks = marks[username];
+        }
+      });
+      
+      await AsyncStorage.setItem("students", JSON.stringify(existingStudents));
+      console.log("Marks saved:", existingStudents); // Log the updated students with marks
+      alert("Marks saved successfully!");
+    } catch (error) {
+      console.error("Error saving marks", error);
+      alert("Failed to save marks");
+    }
+  };
+
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <Header
-        title="GRADE"
-        image={require('../../assets/home/Person.png')}
-      />
+    <View style={styles.safeArea}>
+      <Header title="Add Marks" image={require('../../assets/home/Person.png')} />
+      <ScrollView style={styles.container}>
+        {/* Header Section */}
+        <View style={styles.headerContainer}>
+          <Text style={styles.classText}>Class: 3A</Text>
+          <Text style={styles.dateText}>Date: 12/12/21</Text>
+        </View>
 
-      <View style={styles.container}>
-        <Text style={styles.text}>Class: 3A</Text>
-        <Text style={styles.text}>Date: 12/12/21</Text>
-      </View>
+        {/* Divider */}
+        <View style={styles.blackDivider} />
 
-      {/* Black Divider */}
-      <View style={styles.blackDivider} />
+        {/* Table Header */}
+        <View style={styles.tableHeader}>
+          <Text style={styles.tableHeaderText}>Student Name</Text>
+          <Text style={styles.tableHeaderText1}>Marks</Text>
+        </View>
 
-      {/* Table Header */}
-      <View style={styles.tableHeader}>
-        <Text style={styles.tableHeaderText}>Student Name</Text>
-        <Text style={styles.tableHeaderText1}>Marks</Text>
-      </View>
-
-      {/* Student List */}
-      <ScrollView style={styles.scrollView}>
-        {students.map((name, index) => (
-          <View key={index} style={styles.row}>
-            <Text style={styles.nameText}>{name}</Text>
+        {/* Student List */}
+        {students.map((student) => (
+          <View key={student.username} style={styles.row}>
+            <Text style={styles.nameText}>{student.fullname}</Text>
             <TextInput
               style={styles.markInput}
-              placeholder=""
+              placeholder="Enter Marks"
+              value={marks[student.username] || ""}
+              onChangeText={(value) => handleMarkChange(student.username, value)}
+              keyboardType="numeric"
             />
           </View>
         ))}
       </ScrollView>
 
-      {/* Bottom Black Space */}
-      <View style={styles.blackSpace} />
-
-      {/* Bottom Tabs */}
-      <View style={styles.bottomTabs}>
-        <Text style={styles.tabText}>Subject</Text>
-        <Text style={styles.tabText}>Class</Text>
-      </View>
-    </SafeAreaView>
+      {/* Save Button */}
+      <TouchableOpacity style={styles.saveButton} onPress={handleSaveMarks}>
+        <Text style={styles.saveButtonText}>Save Marks</Text>
+      </TouchableOpacity>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: "#ffffff", // fallback color (visible during image load)
+    backgroundColor: "#ffffff", // Background color
   },
   container: {
+    paddingTop:20,
+  },
+  headerContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#4778c2', // Blue color
+    backgroundColor: '#4778c2', // Blue color for header
     paddingHorizontal: 20,
     paddingVertical: 10,
     width: '100%',
-    
   },
-  text: {
-    color: '#FFFFFF', // White text
+  classText: {
+    color: '#FFFFFF', // White text for class
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  dateText: {
+    color: '#FFFFFF', // White text for date
     fontSize: 18,
     fontWeight: 'bold',
   },
@@ -85,8 +127,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     padding: 10,
-    backgroundColor: '#4778c2', // Matching blue for table header
-    marginTop:10,
+    backgroundColor: '#4778c2', // Blue matching header for table
+    marginTop: 10,
   },
   tableHeaderText: {
     color: '#fff',
@@ -94,27 +136,24 @@ const styles = StyleSheet.create({
     flex: 1,
     textAlign: 'left',
   },
-    tableHeaderText1: {
+  tableHeaderText1: {
     color: '#fff',
     fontWeight: 'bold',
     flex: 1,
     textAlign: 'right',
-    marginRight:34,
-  },
-  scrollView: {
-    flex: 1,
+    marginRight: 34,
   },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
     padding: 10,
-    backgroundColor: '#D3D3D3', // Gray row background
+    backgroundColor: '#D3D3D3', // Light gray row background
     borderBottomWidth: 1,
     borderBottomColor: '#A9A9A9',
   },
   nameText: {
     flex: 3,
-    color: '#333',
+    color: '#333', // Student name color
   },
   markInput: {
     flex: 1,
@@ -125,19 +164,17 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     textAlign: 'center',
   },
-  blackSpace: {
-    height: 100, // Approximate black space; adjust as needed
-    backgroundColor: '#fffdfd',
+  saveButton: {
+    backgroundColor: '#1F4FBF', // Blue color for save button
+    paddingVertical: 12,
+    paddingHorizontal: 25,
+    borderRadius: 8,
+    alignSelf: 'center',
+    marginVertical: 20,
   },
-  bottomTabs: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    padding: 10,
-    backgroundColor: '#4778c2', // Matching blue bottom bar
-  },
-  tabText: {
+  saveButtonText: {
     color: '#fff',
-    fontSize: 16,
     fontWeight: 'bold',
+    fontSize: 16,
   },
 });
