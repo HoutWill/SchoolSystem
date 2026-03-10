@@ -31,7 +31,7 @@ export default function HomeScreen() {
             icon={require(`../assets/home/Person.png`)}
             text="Guest"
             style={{ minWidth: "50%", marginTop: 80 }}
-            onPress={()=>router.push('LoginPage')}
+            onPress={()=>router.push('Guest/Guest')}
           />
         </View>
       </View>
