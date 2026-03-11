@@ -1,7 +1,17 @@
 # SchoolSystem
 
 SchoolSystem is a mobile application built using React Native and Expo. The app provides functionalities for managing student profiles, grades, assignments, and more. It's designed to work across Android, iOS, and web platforms, making it versatile for educational environments.
+------------------------------------------------------------------
+```
+LOGIN 
 
+TEACHER username = teacher , password =123 
+STUDENT username = Hout , password =123456
+STUDENT username = sal , password =123456
+STUDENT username = long , password =123456
+```
+
+------------------------------------------------------------------
 ## Features
 
 - **Student Dashboard**: Display student information like grades, attendance, and assignments.
@@ -166,3 +176,4 @@ For further assistance, feel free to open an issue or reach out!
 - **Contributing**: How to contribute to the project.
 ```
 If you have any other sections you'd like to add or modify, let me know!
+
