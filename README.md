@@ -175,5 +175,6 @@ For further assistance, feel free to open an issue or reach out!
 - **Folder structure**: A brief overview of the project directory structure.
 - **Contributing**: How to contribute to the project.
 ```
-If you have any other sections you'd like to add or modify, let me know!
+
+
 
